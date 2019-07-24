@@ -1,14 +1,17 @@
 package router
 
 import (
+	. "easyGin/handle"
 	"github.com/gin-gonic/gin"
 )
 
 func InitRouter() *gin.Engine {
 	router := gin.Default()
-	r := router.Group("/pc_home")
-	{
-
-	}
+	router.GET("/index", IndexApi)
+	router.POST("/person/", AddPerson)
+	router.GET("/person/:id", GetPerson)
+	router.GET("/persons", GetPerson)
+	router.DELETE("/person/:id", DeletePerson)
+	router.PUT("/person/:id", ModifyPerson)
 	return router
 }

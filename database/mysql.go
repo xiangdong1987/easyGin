@@ -1,15 +1,14 @@
 package database
 
 import (
+	"easyGin/config"
+	"easyGin/tools"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	"go-pc_home/config"
-	"go-pc_home/tools"
 )
 
-var Eloquent *gorm.DB
 var DBList map[string]*gorm.DB
 
 func init() {

@@ -1,4 +1,4 @@
-# go-pc_home
+# easyGin
 
 * 查看当前环境
 echo $GIN_MODE

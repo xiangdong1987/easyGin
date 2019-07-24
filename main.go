@@ -1,9 +1,9 @@
 package main
 
 import (
-	"go-pc_home/config"
-	orm "go-pc_home/database"
-	"go-pc_home/router"
+	"easyGin/config"
+	orm "easyGin/database"
+	"easyGin/router"
 )
 
 func main() {
@@ -15,5 +15,5 @@ func main() {
 	defer config.RedisObj.Close()
 	config.SetRedisObj()
 	r := router.InitRouter()
-	r.Run(":8081")
+	r.Run(":8082")
 }
