@@ -5,7 +5,6 @@ import (
 	"easyGin/tools"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
 	"regexp"
 	"strings"
 )
@@ -16,7 +15,7 @@ var mariadbTable string
 var mariadbDatabase string
 var mariadbPassword string
 var mariadbUser string
-
+var databaseIndex string
 var dbConfig map[string]string
 
 func init() {
@@ -26,6 +25,7 @@ func init() {
 
 func InitDB(dbIndex string) {
 	db := dbConfig[dbIndex]
+	databaseIndex = dbIndex
 	parseMysql(db)
 }
 

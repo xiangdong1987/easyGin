@@ -1,9 +1,9 @@
 package scaffold
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"sort"
 	"strconv"
 	"strings"
@@ -13,11 +13,11 @@ import (
 func GetColumnsFromMysqlTable(mariadbUser string, mariadbPassword string, mariadbHost string, mariadbPort int, mariadbDatabase string, mariadbTable string) (*map[string]map[string]string, error) {
 
 	var err error
-	var db *sql.DB
+	var db *gorm.DB
 	if mariadbPassword != "" {
-		db, err = sql.Open("mysql", mariadbUser+":"+mariadbPassword+"@tcp("+mariadbHost+":"+strconv.Itoa(mariadbPort)+")/"+mariadbDatabase+"?&parseTime=True")
+		db, err = gorm.Open("mysql", mariadbUser+":"+mariadbPassword+"@tcp("+mariadbHost+":"+strconv.Itoa(mariadbPort)+")/"+mariadbDatabase+"?&parseTime=True")
 	} else {
-		db, err = sql.Open("mysql", mariadbUser+"@tcp("+mariadbHost+":"+strconv.Itoa(mariadbPort)+")/"+mariadbDatabase+"?&parseTime=True")
+		db, err = gorm.Open("mysql", mariadbUser+"@tcp("+mariadbHost+":"+strconv.Itoa(mariadbPort)+")/"+mariadbDatabase+"?&parseTime=True")
 	}
 	defer db.Close()
 
@@ -36,7 +36,7 @@ func GetColumnsFromMysqlTable(mariadbUser string, mariadbPassword string, mariad
 		fmt.Println("running: " + columnDataTypeQuery)
 	}
 
-	rows, err := db.Query(columnDataTypeQuery, mariadbDatabase, mariadbTable)
+	rows, err := db.Raw(columnDataTypeQuery, mariadbDatabase, mariadbTable).Rows()
 
 	if err != nil {
 		fmt.Println("Error selecting from db: " + err.Error())
@@ -133,7 +133,6 @@ func generateMysqlTypes(obj map[string]map[string]string, depth int, jsonAnnotat
 	return structure
 }
 
-// mysqlTypeToGoType converts the mysql types to go compatible sql.Nullable (https://golang.org/pkg/database/sql/) types
 func mysqlTypeToGoType(mysqlType string, nullable bool, gureguTypes bool) string {
 	switch mysqlType {
 	case "tinyint", "int", "smallint", "mediumint":

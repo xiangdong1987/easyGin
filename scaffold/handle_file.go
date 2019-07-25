@@ -41,7 +41,7 @@ func readFile(filePath string, position string, replacer string) ([]byte, bool, 
 }
 
 func writeToFile(filePath string, outPut []byte) error {
-	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0600)
+	f, err := os.OpenFile(filePath, os.O_WRONLY|os.O_CREATE, 0600)
 	defer f.Close()
 	if err != nil {
 		return err

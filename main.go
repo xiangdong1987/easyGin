@@ -2,10 +2,10 @@ package main
 
 import (
 	"easyGin/config"
-	orm "easyGin/database"
+	"easyGin/database"
+	"easyGin/router"
 	"easyGin/scaffold"
 	"github.com/droundy/goopt"
-	"go-pc_home/router"
 )
 
 var ifScaffold = goopt.Int([]string{"--ifScaffold"}, 0, "if use scaffold")
@@ -29,7 +29,7 @@ func init() {
 func main() {
 	if *ifScaffold == 0 {
 		defer func() {
-			for _, value := range orm.DBList {
+			for _, value := range database.DBList {
 				value.Close()
 			}
 		}()
