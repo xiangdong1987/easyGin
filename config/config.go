@@ -41,3 +41,5 @@ func SetRedisObj() {
 }
 
 var ModelPath = "D:/data/go/src/easyGin/models/"
+var RouterPath = "D:/data/go/src/easyGin/router/"
+var ApiPath = "D:/data/go/src/easyGin/handle/"

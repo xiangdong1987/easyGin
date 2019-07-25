@@ -1,7 +1,6 @@
 package models
 
-import "easyGin/database"
-
+import ("easyGin/database")
 type Person struct {
 	Age   int    `gorm:"column:age" json:"age" form:"age"`
 	Ctime int    `gorm:"column:ctime" json:"ctime" form:"ctime"`
@@ -15,12 +14,12 @@ func (p *Person) TableName() string {
 	return "person"
 }
 func (p *Person) Insert() (err error) {
-	dbe, err := database.Database("test")
-	if err != nil {
-		return
-	}
-	err = dbe.Create(p).Error
-	return
+	dbe, err := database.Database("test") 
+	if err != nil { 
+		return 
+	} 
+	err = dbe.Create(p).Error 
+	return 
 }
 func (p *Person) GetById(id int) (err error) {
 	dbe, err := database.Database("test")
@@ -30,7 +29,7 @@ func (p *Person) GetById(id int) (err error) {
 	err = dbe.Where("id=?", id).First(p).Error
 	return
 }
-func (p *Person) GetList(currentPage int, pageSize int) (list []Person, pageInfo database.PageInfo, err error) {
+func (p *Person) GetList(currentPage int, pageSize int) (list []Person, pageInfo database.PageInfo, err error) { 
 	dbe, err := database.Database("test")
 	if err != nil {
 		return

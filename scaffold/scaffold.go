@@ -4,10 +4,8 @@ import (
 	"easyGin/config"
 	"easyGin/tools"
 	"fmt"
-	"github.com/Shelnutt2/db2struct"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"os"
 	"regexp"
 	"strings"
 )
@@ -25,13 +23,15 @@ func init() {
 	env := gin.Mode()
 	dbConfig := config.MysqlConfigMap[env]
 	db := dbConfig[databaseIndex]
-	fmt.Println(db)
-	parseMysql(db)
+	err := parseMysql(db)
+	if err != nil {
+		panic(err.Error())
+	}
 }
-func parseMysql(link string) {
-	flysnowRegexp := regexp.MustCompile(`(\S+):(\S+)@tcp\((\S+):(\S+)\)/(\S+)\?`)
-	params := flysnowRegexp.FindStringSubmatch(link)
-	fmt.Println(params)
+
+func parseMysql(link string) (err error) {
+	mysqlRegexp := regexp.MustCompile(`(\S+):(\S+)@tcp\((\S+):(\S+)\)/(\S+)\?`)
+	params := mysqlRegexp.FindStringSubmatch(link)
 	for key, param := range params {
 		if key == 1 {
 			mariadbUser = param
@@ -49,27 +49,30 @@ func parseMysql(link string) {
 			mariadbDatabase = param
 		}
 	}
-}
-func InitModels(table string, structName string, packageName string, jsonAnnotation bool, gormAnnotation bool, gureguTypes bool) {
-	mariadbTable = table
 	// Username is required
 	if mariadbUser == "user" {
-		fmt.Println("Username is required! Add it with --user=name")
+		err = tools.ReturnError{}.Custom(1, "Username is required! Add it with --user=name")
 		return
 	}
 	if mariadbPassword == "" {
-		fmt.Println("Password can not be null ")
-
+		err = tools.ReturnError{}.Custom(2, "Password can not be null ")
+		return
 	}
 	if mariadbDatabase == "" {
-		fmt.Println("Database can not be null")
+		err = tools.ReturnError{}.Custom(2, "Database can not be null")
 		return
 	}
 	if mariadbTable == "" {
-		fmt.Println("Table can not be null")
+		err = tools.ReturnError{}.Custom(2, "Table can not be null")
 		return
 	}
-	columnDataTypes, err := db2struct.GetColumnsFromMysqlTable(mariadbUser, mariadbPassword, mariadbHost, mariadbPort, mariadbDatabase, mariadbTable)
+	return
+}
+func InitModels(table string, structName string) {
+	packageName := "models"
+	mariadbTable = table
+
+	columnDataTypes, err := GetColumnsFromMysqlTable(mariadbUser, mariadbPassword, mariadbHost, mariadbPort, mariadbDatabase, mariadbTable)
 	if err != nil {
 		fmt.Println("Error in selecting column data information from mysql information schema")
 		return
@@ -78,77 +81,45 @@ func InitModels(table string, structName string, packageName string, jsonAnnotat
 	if structName == "" {
 		structName = "newstruct"
 	}
-	// If packageName is not set we need to default it
-	if packageName == "" {
-		packageName = "newpackage"
-	}
 	// Generate struct string based on columnDataTypes
-	struc, err := db2struct.Generate(*columnDataTypes, mariadbTable, structName, packageName, jsonAnnotation, gormAnnotation, gureguTypes)
+	struc, err := Generate(*columnDataTypes, mariadbTable, structName, packageName, true, true, false)
 	if err != nil {
 		fmt.Println("Error in creating struct from json: " + err.Error())
 		return
 	}
 	model := string(struc)
-	model = model + GenerateCURD(structName, "id")
+	//import package
+	reg := regexp.MustCompile(`//packages`)
+	model = reg.ReplaceAllString(model, "import (\"easyGin/database\")")
+	//get primary key
+	primaryKey := getPrimaryKey(*columnDataTypes)
+	model = model + GenerateCURD(structName, primaryKey)
 	targetDirectory := config.ModelPath + structName + ".go"
-	file, err := os.OpenFile(targetDirectory, os.O_WRONLY|os.O_CREATE, os.ModeAppend)
+	err = writeToFile(targetDirectory, []byte(model))
 	if err != nil {
-		fmt.Println("Open File fail: " + err.Error())
+		fmt.Println(err)
 		return
 	}
-	length, err := file.WriteString(model)
+	return
+}
+
+func InitRouter(structName string) (err error) {
+	routerPath := config.RouterPath + "router.go"
+	router := GenerateRouter(structName)
+	out, isHandle, err := readFile(routerPath, "//Add router", router)
 	if err != nil {
 		fmt.Println("Save File fail: " + err.Error())
 		return
 	}
-	fmt.Printf("wrote %d bytes\n", length)
-	//fmt.Println(string(struc))
+	if isHandle {
+		err = writeToFile(routerPath, out)
+	}
+	return
 }
 
-func GenerateCURD(structName string, primaryKey string) string {
-	insert := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") Insert() (err error) {\n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\") \n" +
-		"	if err != nil { \n" +
-		"		return \n" +
-		"	} \n" +
-		"	err = dbe.Create(" + strings.ToLower(string(structName[0])) + ").Error \n" +
-		"	return \n" +
-		"}\n"
-	getOne := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") GetById(id int) (err error) {\n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\")\n" +
-		"	if err != nil {\n" +
-		"		return\n" +
-		"	}\n" +
-		"	err = dbe.Where(\"" + primaryKey + "=?\", id).First(" + strings.ToLower(string(structName[0])) + ").Error\n" +
-		"	return\n" +
-		"}\n"
-	getList := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") GetList(currentPage int, pageSize int) (list []" + structName + ", pageInfo database.PageInfo, err error) { \n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\")\n" +
-		"	if err != nil {\n" +
-		"		return\n" +
-		"	}\n" +
-		"	start := (currentPage - 1) * pageSize\n" +
-		"	dbList := dbe.Limit(pageSize).Offset(start).Order(\"" + primaryKey + " DESC\")\n" +
-		"	err = dbList.Find(&list).Error\n" +
-		"	pageInfo = pageInfo.GetPageInfo(dbe, &" + structName + "{}, currentPage, pageSize)\n" +
-		"	return\n" +
-		"}\n"
-	deleteID := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") DeleteById(id int) (err error) {\n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\")\n" +
-		"	if err != nil {\n" +
-		"		return\n" +
-		"	}\n" +
-		"	err = dbe.Where(\"" + primaryKey + "=?\", id).Delete(" + strings.ToLower(string(structName[0])) + ").Error\n" +
-		"	return\n" +
-		"}\n"
-	update := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") ModifyById() (err error) {\n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\")\n" +
-		"	if err != nil {\n" +
-		"		return\n" +
-		"	}\n" +
-		"	err = dbe.Save(" + strings.ToLower(string(structName[0])) + ").Error\n" +
-		"	return\n" +
-		"}\n"
-	//println(insert, getOne, getList, delete, update)
-	return insert + getOne + getList + deleteID + update
+func InitApi(structName string) (err error) {
+	apiPath := config.ApiPath + strings.ToLower(structName) + ".go"
+	api := GenerateApi(structName)
+	err = writeToFile(apiPath, []byte(api))
+	return
 }

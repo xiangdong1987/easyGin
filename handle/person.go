@@ -24,7 +24,6 @@ func AddPerson(c *gin.Context) {
 	c.JSON(http.StatusOK, tools.GetResult(0, "Params is wrong", ""))
 	return
 }
-
 func GetPerson(c *gin.Context) {
 	id := c.Param("id")
 	var person models.Person
@@ -67,7 +66,6 @@ func DeletePerson(c *gin.Context) {
 		return
 	}
 }
-
 func ModifyPerson(c *gin.Context) {
 	var person models.Person
 	if c.ShouldBind(&person) == nil {

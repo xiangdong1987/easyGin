@@ -11,3 +11,12 @@ func TestInitModels(t *testing.T) {
 func TestGenerateCURD(t *testing.T) {
 	println(scaffold.GenerateCURD("Person", "id"))
 }
+func TestInitRouter(t *testing.T) {
+	println(scaffold.InitRouter("Person"))
+}
+func TestGenerateApi(t *testing.T) {
+	println(scaffold.GenerateApi("Person"))
+}
+func TestInitApi(t *testing.T) {
+	println(scaffold.InitApi("Person"))
+}
