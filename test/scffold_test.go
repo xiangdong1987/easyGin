@@ -6,7 +6,7 @@ import (
 )
 
 func TestInitModels(t *testing.T) {
-	scaffold.InitModels("person", "Person", "models", true, true, true)
+	scaffold.InitModels("person", "Person")
 }
 func TestGenerateCURD(t *testing.T) {
 	println(scaffold.GenerateCURD("Person", "id"))

@@ -17,16 +17,16 @@ var mariadbDatabase string
 var mariadbPassword string
 var mariadbUser string
 
-var databaseIndex = "test"
+var dbConfig map[string]string
 
 func init() {
 	env := gin.Mode()
-	dbConfig := config.MysqlConfigMap[env]
-	db := dbConfig[databaseIndex]
-	err := parseMysql(db)
-	if err != nil {
-		panic(err.Error())
-	}
+	dbConfig = config.MysqlConfigMap[env]
+}
+
+func InitDB(dbIndex string) {
+	db := dbConfig[dbIndex]
+	parseMysql(db)
 }
 
 func parseMysql(link string) (err error) {
