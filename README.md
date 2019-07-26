@@ -10,6 +10,7 @@
 ## 功能
 * 项目的目录结构
 * 快速restful api 生成
+* go mod 接入
 
 ```
 go run main.go --ifScaffold 1 --struct structName --index db_index databaseName --table tableName
@@ -18,4 +19,3 @@ go run main.go --ifScaffold 1 --struct structName --index db_index databaseName 
 
 * 代码测试覆盖
 * 性能测试
-* go mod 接入
