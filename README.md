@@ -1,19 +1,18 @@
 # easyGin
-
-* 查看当前环境
-echo $GIN_MODE
-* 配置环境
-```
-    export GIN_MODE=debug
-    export GIN_MODE=test
-    //正式
-    export GIN_MODE=release
-```
-* 运行
-go run *.go
-
-* 自动创建struct
+## 概述
+* 实现了快速上手Gin，自动生成Restful Api的脚手架，代码依赖少轻量。可以快速开发Restful Api,代码一键生成。
+## 依赖
+* db2struck 代码生成对db2struck 进行了改造
+* Gin 框架
+* gorm mysql驱动
+* go-redis redis 驱动
+* go vendor 依赖管理
+## 功能
+* 项目的目录结构
+* 快速restful api 生成
 
 ```
-    db2struct --host 10.10.1.23 -d chelun_home -t home_news --package models --struct homeNews -p --user chelun --guregu --gorm
+go run main.go --ifScaffold 1 --struct structName --index db_index databaseName --table tableName
 ```
+## 待开发（思考中，欢迎大神提供建议）
+
