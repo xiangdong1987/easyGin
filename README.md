@@ -18,4 +18,4 @@ go run main.go --ifScaffold 1 --struct structName --index db_index databaseName 
 
 * 代码测试覆盖
 * 性能测试
-
+* go mod 接入
