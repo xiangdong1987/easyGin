@@ -16,6 +16,5 @@ func InitRouter() *gin.Engine {
 	router.PUT("/person/:id", ModifyPerson)
 	//Add router
 
-
 	return router
 }

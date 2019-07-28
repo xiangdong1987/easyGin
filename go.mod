@@ -10,4 +10,5 @@ require (
 	github.com/google/uuid v1.1.1 // indirect
 	github.com/jinzhu/gorm v1.9.10
 	github.com/maxence-charriere/app v0.0.0-20190725215605-e2a786b82d6f // indirect
+	github.com/smartystreets/goconvey v0.0.0-20190710185942-9d28bd7c0945
 )

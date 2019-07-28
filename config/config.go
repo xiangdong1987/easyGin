@@ -3,11 +3,12 @@ package config
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
+	"os"
 )
 
 var MysqlConfigMap = map[string]map[string]string{
 	"debug": {
-		"test": "chelun:chelun@tcp(10.10.1.23:3306)/chelun_home?charset=utf8&parseTime=True&loc=Local&timeout=10ms",
+		"test": "root:root@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=10ms",
 	},
 }
 var redisConfigMap = map[string]string{
@@ -40,6 +41,8 @@ func SetRedisObj() {
 	}
 }
 
-var ModelPath = "d:/data/go/src/easyGin/models/"
-var RouterPath = "d:/data/go/src/easyGin/router/"
-var ApiPath = "d:/data/go/src/easyGin/handle/"
+var currentPath, _ = os.Getwd()
+
+var ModelPath = currentPath + "/models/"
+var RouterPath = currentPath + "/router/"
+var ApiPath = currentPath + "/handle/"

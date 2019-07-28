@@ -93,7 +93,8 @@ func InitModels(table string, structName string) {
 	model = reg.ReplaceAllString(model, "import (\"easyGin/database\")")
 	//get primary key
 	primaryKey := getPrimaryKey(*columnDataTypes)
-	model = model + GenerateCURD(structName, primaryKey)
+	curd, _ := GenerateCURD(structName, primaryKey)
+	model = model + curd
 	targetDirectory := config.ModelPath + structName + ".go"
 	err = writeToFile(targetDirectory, []byte(model))
 	if err != nil {

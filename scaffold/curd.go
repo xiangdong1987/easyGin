@@ -1,55 +1,82 @@
 package scaffold
 
 import (
+	"bytes"
+	"log"
 	"strings"
+	"text/template"
 )
 
-func GenerateCURD(structName string, primaryKey string) string {
-	insert := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") Insert() (err error) {\n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\") \n" +
-		"	if err != nil { \n" +
-		"		return \n" +
-		"	} \n" +
-		"	err = dbe.Create(" + strings.ToLower(string(structName[0])) + ").Error \n" +
-		"	return \n" +
-		"}\n"
-	getOne := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") GetById(id int) (err error) {\n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\")\n" +
-		"	if err != nil {\n" +
-		"		return\n" +
-		"	}\n" +
-		"	err = dbe.Where(\"" + primaryKey + "=?\", id).First(" + strings.ToLower(string(structName[0])) + ").Error\n" +
-		"	return\n" +
-		"}\n"
-	getList := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") GetList(currentPage int, pageSize int) (list []" + structName + ", pageInfo database.PageInfo, err error) { \n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\")\n" +
-		"	if err != nil {\n" +
-		"		return\n" +
-		"	}\n" +
-		"	start := (currentPage - 1) * pageSize\n" +
-		"	dbList := dbe.Limit(pageSize).Offset(start).Order(\"" + primaryKey + " DESC\")\n" +
-		"	err = dbList.Find(&list).Error\n" +
-		"	pageInfo = pageInfo.GetPageInfo(dbe, &" + structName + "{}, currentPage, pageSize)\n" +
-		"	return\n" +
-		"}\n"
-	deleteID := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") DeleteById(id int) (err error) {\n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\")\n" +
-		"	if err != nil {\n" +
-		"		return\n" +
-		"	}\n" +
-		"	err = dbe.Where(\"" + primaryKey + "=?\", id).Delete(" + strings.ToLower(string(structName[0])) + ").Error\n" +
-		"	return\n" +
-		"}\n"
-	update := "func (" + strings.ToLower(string(structName[0])) + " *" + structName + ") ModifyById() (err error) {\n" +
-		"	dbe, err := database.Database(\"" + databaseIndex + "\")\n" +
-		"	if err != nil {\n" +
-		"		return\n" +
-		"	}\n" +
-		"	err = dbe.Save(" + strings.ToLower(string(structName[0])) + ").Error\n" +
-		"	return\n" +
-		"}\n"
-	//println(insert, getOne, getList, delete, update)
-	return insert + getOne + getList + deleteID + update
+type CurdTemplate struct {
+	LowerName  string
+	StructName string
+	FirstChar  string
+	DataIndex  string
+	PrimaryKey string
+}
+
+const curdTemplate = `func ({{.FirstChar}} *{{.StructName}}) Insert() (err error) {
+	dbe, err := database.Database("{{.DataIndex}}") 
+	if err != nil { 
+		return 
+	} 
+	err = dbe.Create({{.FirstChar}}).Error 
+	return 
+}
+func ({{.FirstChar}} *{{.StructName}}) GetById(id int) (err error) {
+	dbe, err := database.Database("{{.DataIndex}}")
+	if err != nil {
+		return
+	}
+	err = dbe.Where("{{.PrimaryKey}}=?", id).First({{.FirstChar}}).Error
+	return
+}
+func ({{.FirstChar}} *{{.StructName}}) GetList(currentPage int, pageSize int) (list []{{.StructName}}, pageInfo database.PageInfo, err error) { 
+	dbe, err := database.Database("{{.DataIndex}}")
+	if err != nil {
+		return
+	}
+	start := (currentPage - 1) * pageSize
+	dbList := dbe.Limit(pageSize).Offset(start).Order("id DESC")
+	err = dbList.Find(&list).Error
+	pageInfo = pageInfo.GetPageInfo(dbe, &{{.StructName}}{}, currentPage, pageSize)
+	return
+}
+func ({{.FirstChar}} *{{.StructName}}) DeleteById(id int) (err error) {
+	dbe, err := database.Database("{{.DataIndex}}")
+	if err != nil {
+		return
+	}
+	err = dbe.Where("{{.PrimaryKey}}=?", id).Delete({{.FirstChar}}).Error
+	return
+}
+func ({{.FirstChar}} *{{.StructName}}) ModifyById() (err error) {
+	dbe, err := database.Database("{{.DataIndex}}")
+	if err != nil {
+		return
+	}
+	err = dbe.Save({{.FirstChar}}).Error
+	return
+}`
+
+func GenerateCURD(structName string, primaryKey string) (result string, err error) {
+	t := template.New("curl")
+	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, primaryKey}
+	//解析内容到模板
+	t, err = t.Parse(curdTemplate)
+	if err != nil {
+		log.Fatal("Parse:", err)
+		return
+	}
+	//将数据用到模板中
+	buf := new(bytes.Buffer)
+	if err = t.Execute(buf, curdStrut); err != nil {
+		//log.Fatal("Execute:", err)
+		return
+	} else {
+		result = buf.String()
+	}
+	return
 }
 func GenerateApi(structName string) string {
 	pk := "package handle\n"
