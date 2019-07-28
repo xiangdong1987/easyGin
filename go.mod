@@ -3,7 +3,7 @@ module easyGin
 go 1.12
 
 require (
-	github.com/droundy/goopt v0.0.0-20170604162106-0b8effe182da // indirect
+	github.com/droundy/goopt v0.0.0-20170604162106-0b8effe182da
 	github.com/gin-gonic/gin v1.4.0
 	github.com/go-redis/redis v6.15.3+incompatible
 	github.com/go-sql-driver/mysql v1.4.1

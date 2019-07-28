@@ -71,7 +71,7 @@ func GenerateCURD(structName string, primaryKey string) (result string, err erro
 	//将数据用到模板中
 	buf := new(bytes.Buffer)
 	if err = t.Execute(buf, curdStrut); err != nil {
-		//log.Fatal("Execute:", err)
+		log.Fatal("Execute:", err)
 		return
 	} else {
 		result = buf.String()

@@ -6,21 +6,10 @@ import (
 	"testing"
 )
 
-func TestInitModels(t *testing.T) {
-	Convey("Given some integer with a starting value", t, func() {
-		x := 1
-		Convey("When the integer is incremented", func() {
-			x++
-			Convey("The value should be greater by one", func() {
-				So(x, ShouldEqual, 2)
-			})
-		})
-	})
-}
 func TestGenerateCURD(t *testing.T) {
 	Convey("生成Curd", t, func() {
 		scaffold.InitDB("test")
-		Convey("The value should be greater by one", func() {
+		Convey("正确生成curd", func() {
 			x, _ := scaffold.GenerateCURD("Person", "id")
 			So(x, ShouldEqual, `func (p *Person) Insert() (err error) {
 	dbe, err := database.Database("test") 
@@ -67,13 +56,4 @@ func (p *Person) ModifyById() (err error) {
 }`)
 		})
 	})
-}
-func TestInitRouter(t *testing.T) {
-	println(scaffold.InitRouter("Person"))
-}
-func TestGenerateApi(t *testing.T) {
-	println(scaffold.GenerateApi("Person"))
-}
-func TestInitApi(t *testing.T) {
-	println(scaffold.InitApi("Person"))
 }
