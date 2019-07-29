@@ -53,7 +53,7 @@ func scaffoldInit() {
 		panic("structName can not null")
 	}
 	scaffold.InitDB(*databaseIndex)
-	scaffold.InitModels(*table, *structName)
-	scaffold.InitApi(*structName)
-	scaffold.InitRouter(*structName)
+	scaffold.InitModels(*table, *structName, config.ModelPath)
+	scaffold.InitApi(*structName, config.ApiPath)
+	scaffold.InitRouter(*structName, config.RouterPath)
 }

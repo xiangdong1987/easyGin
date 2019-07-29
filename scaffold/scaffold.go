@@ -23,10 +23,11 @@ func init() {
 	dbConfig = config.MysqlConfigMap[env]
 }
 
-func InitDB(dbIndex string) {
+func InitDB(dbIndex string) (err error) {
 	db := dbConfig[dbIndex]
 	databaseIndex = dbIndex
-	parseMysql(db)
+	err = parseMysql(db)
+	return
 }
 
 func parseMysql(link string) (err error) {
@@ -62,16 +63,11 @@ func parseMysql(link string) (err error) {
 		err = tools.ReturnError{}.Custom(2, "Database can not be null")
 		return
 	}
-	if mariadbTable == "" {
-		err = tools.ReturnError{}.Custom(2, "Table can not be null")
-		return
-	}
 	return
 }
-func InitModels(table string, structName string) {
+func InitModels(table string, structName string, modelsPath string) (err error) {
 	packageName := "models"
 	mariadbTable = table
-
 	columnDataTypes, err := GetColumnsFromMysqlTable(mariadbUser, mariadbPassword, mariadbHost, mariadbPort, mariadbDatabase, mariadbTable)
 	if err != nil {
 		fmt.Println("Error in selecting column data information from mysql information schema")
@@ -95,7 +91,7 @@ func InitModels(table string, structName string) {
 	primaryKey := getPrimaryKey(*columnDataTypes)
 	curd, _ := GenerateCURD(structName, primaryKey)
 	model = model + curd
-	targetDirectory := config.ModelPath + structName + ".go"
+	targetDirectory := modelsPath + structName + ".go"
 	err = writeToFile(targetDirectory, []byte(model))
 	if err != nil {
 		fmt.Println(err)
@@ -104,8 +100,8 @@ func InitModels(table string, structName string) {
 	return
 }
 
-func InitRouter(structName string) (err error) {
-	routerPath := config.RouterPath + "router.go"
+func InitRouter(structName string, routerPath string) (err error) {
+	routerPath = routerPath + "router.go"
 	router := GenerateRouter(structName)
 	out, isHandle, err := readFile(routerPath, "//Add router", router)
 	if err != nil {
@@ -118,8 +114,8 @@ func InitRouter(structName string) (err error) {
 	return
 }
 
-func InitApi(structName string) (err error) {
-	apiPath := config.ApiPath + strings.ToLower(structName) + ".go"
+func InitApi(structName string, apiPath string) (err error) {
+	apiPath = apiPath + strings.ToLower(structName) + ".go"
 	api := GenerateApi(structName)
 	err = writeToFile(apiPath, []byte(api))
 	return
