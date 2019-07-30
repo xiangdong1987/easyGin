@@ -13,9 +13,13 @@
 * go mod 接入
 * go template 代码模板
 * 代码测试覆盖
+* 性能测试
 
 ```
 go run main.go --ifScaffold 1 --struct Person --index test --table person
 ```
+## 测试
+* 单元测试：对脚手架工具进行了单元测试
+* 性能测试：虚拟机 2G 内存 单核 cup 结果如下
+ ![设置1](/static/ab.png)
 ## 待开发（思考中，欢迎大神提供建议）
-* 性能测试

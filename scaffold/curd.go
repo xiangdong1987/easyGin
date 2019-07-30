@@ -59,6 +59,98 @@ func ({{.FirstChar}} *{{.StructName}}) ModifyById() (err error) {
 	return
 }`
 
+const apiTemplate = `package handle
+
+import (
+	"easyGin/models"
+	"easyGin/tools"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
+
+func Add{{.StructName}}(c *gin.Context) {
+	var {{.LowerName}} models.{{.StructName}}
+	if c.ShouldBind(&{{.LowerName}}) == nil {
+		fmt.Println({{.LowerName}})
+		err := {{.LowerName}}.Insert()
+		if err != nil {
+			c.JSON(http.StatusOK, err)
+			return
+		} else {
+			c.JSON(http.StatusOK, tools.GetResult(0, "Success", ""))
+			return
+		}
+	}
+	c.JSON(http.StatusOK, tools.GetResult(0, "Params is wrong", ""))
+	return
+}
+func Get{{.StructName}}(c *gin.Context) {
+	id := c.Param("id")
+	var {{.LowerName}} models.{{.StructName}}
+	if id != "" {
+		err := {{.LowerName}}.GetById(tools.String2Int(id))
+		if err != nil {
+			c.JSON(http.StatusOK, err)
+			return
+		} else {
+			c.JSON(http.StatusOK, tools.GetResult(0, "Success", gin.H{
+				"{{.LowerName}}": {{.LowerName}},
+			}))
+			return
+		}
+	} else {
+		page := c.DefaultQuery("page", "1")
+		pageSize := c.DefaultQuery("page_size", "10")
+		list, pageInfo, err := {{.LowerName}}.GetList(tools.String2Int(page), tools.String2Int(pageSize))
+		if err != nil {
+			c.JSON(http.StatusOK, err)
+			return
+		} else {
+			c.JSON(http.StatusOK, tools.GetResult(0, "Success", gin.H{
+				"list":      list,
+				"page_info": pageInfo,
+			}))
+			return
+		}
+	}
+}
+func Delete{{.StructName}}(c *gin.Context) {
+	id := c.Param("id")
+	var {{.LowerName}} models.{{.StructName}}
+	err := {{.LowerName}}.DeleteById(tools.String2Int(id))
+	if err != nil {
+		c.JSON(http.StatusOK, err)
+		return
+	} else {
+		c.JSON(http.StatusOK, tools.GetResult(0, "Success", ""))
+		return
+	}
+}
+func Modify{{.StructName}}(c *gin.Context) {
+	var {{.LowerName}} models.{{.StructName}}
+	if c.ShouldBind(&{{.LowerName}}) == nil {
+		fmt.Println({{.LowerName}})
+		err := {{.LowerName}}.ModifyById()
+		if err != nil {
+			c.JSON(http.StatusOK, err)
+			return
+		} else {
+			c.JSON(http.StatusOK, tools.GetResult(0, "Success", ""))
+			return
+		}
+	}
+	c.JSON(http.StatusOK, tools.GetResult(0, "Params is wrong", ""))
+	return
+}
+`
+const routerTemplate = `router.POST("/{{.LowerName}}/", Add{{.StructName}})
+	router.GET("/{{.LowerName}}/:id", Get{{.StructName}})
+	router.GET("/{{.LowerName}}s", Get{{.StructName}})
+	router.DELETE("/{{.LowerName}}/:id", Delete{{.StructName}})
+	router.PUT("/{{.LowerName}}/:id", Modify{{.StructName}})
+	//Add router`
+
 func GenerateCURD(structName string, primaryKey string) (result string, err error) {
 	t := template.New("curl")
 	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, primaryKey}
@@ -78,97 +170,41 @@ func GenerateCURD(structName string, primaryKey string) (result string, err erro
 	}
 	return
 }
-func GenerateApi(structName string) string {
-	pk := "package handle\n"
-	pks := "import (\n" +
-		"	\"easyGin/models\"\n" +
-		"	\"easyGin/tools\"\n" +
-		"	\"fmt\"\n" +
-		"	\"github.com/gin-gonic/gin\"\n" +
-		"	\"net/http\"\n" +
-		")\n"
-	add := "func Add" + structName + "(c *gin.Context) {\n" +
-		"	var " + strings.ToLower(structName) + " models." + structName + "\n" +
-		"	if c.ShouldBind(&" + strings.ToLower(structName) + ") == nil {\n" +
-		"		fmt.Println(" + strings.ToLower(structName) + ")\n" +
-		"		err := " + strings.ToLower(structName) + ".Insert()\n" +
-		"		if err != nil {\n" +
-		"			c.JSON(http.StatusOK, err)\n" +
-		"			return		\n" +
-		"		} else {\n" +
-		"			c.JSON(http.StatusOK, tools.GetResult(0, \"Success\", \"\"))\n" +
-		"			return\n" +
-		"		}\n" +
-		"	}\n" +
-		"	c.JSON(http.StatusOK, tools.GetResult(0, \"Params is wrong\", \"\"))\n" +
-		"	return\n" +
-		"}\n"
-	get := "func Get" + structName + "(c *gin.Context) {\n" +
-		"	id := c.Param(\"id\")\n" +
-		"	var " + strings.ToLower(structName) + " models." + structName + "\n" +
-		"	if id != \"\" {" +
-		"		err := " + strings.ToLower(structName) + ".GetById(tools.String2Int(id))\n" +
-		"		if err != nil {\n" +
-		"			c.JSON(http.StatusOK, err)\n" +
-		"			return\n" +
-		"		} else {\n" +
-		"			c.JSON(http.StatusOK, tools.GetResult(0, \"Success\", gin.H{\n" +
-		"				\"" + strings.ToLower(structName) + "\": " + strings.ToLower(structName) + ",\n" +
-		"			}))\n" +
-		"			return\n" +
-		"		}\n" +
-		"	} else {\n" +
-		"		page := c.DefaultQuery(\"page\", \"1\")\n" +
-		"		pageSize := c.DefaultQuery(\"page_size\", \"10\")\n" +
-		"		list, pageInfo, err := " + strings.ToLower(structName) + ".GetList(tools.String2Int(page), tools.String2Int(pageSize))\n" +
-		"		if err != nil {\n" +
-		"			c.JSON(http.StatusOK, err)\n" +
-		"			return\n" +
-		"		} else {\n" +
-		"			c.JSON(http.StatusOK, tools.GetResult(0, \"Success\", gin.H{\n" +
-		"				\"list\":      list,\n" +
-		"				\"page_info\": pageInfo,\n" +
-		"			}))\n" +
-		"			return\n" +
-		"		}\n" +
-		"	}\n" +
-		"}\n"
-	delete := "func Delete" + structName + "(c *gin.Context) {\n" +
-		"	id := c.Param(\"id\")\n" +
-		"	var " + strings.ToLower(structName) + " models." + structName + "\n" +
-		"	err := " + strings.ToLower(structName) + ".DeleteById(tools.String2Int(id))\n" +
-		"	if err != nil {\n" +
-		"		c.JSON(http.StatusOK, err)\n" +
-		"		return\n" +
-		"	} else {\n" +
-		"		c.JSON(http.StatusOK, tools.GetResult(0, \"Success\", \"\"))\n" +
-		"		return\n" +
-		"	}\n" +
-		"}\n"
-	update := "func Modify" + structName + "(c *gin.Context) {\n" +
-		"	var person models." + structName + "\n" +
-		"	if c.ShouldBind(&" + strings.ToLower(structName) + ") == nil {\n" +
-		"		fmt.Println(" + strings.ToLower(structName) + ")\n" +
-		"		err := " + strings.ToLower(structName) + ".ModifyById()\n" +
-		"		if err != nil {\n" +
-		"			c.JSON(http.StatusOK, err)\n" +
-		"			return\n" +
-		"		} else {\n" +
-		"			c.JSON(http.StatusOK, tools.GetResult(0, \"Success\", \"\"))\n" +
-		"			return\n" +
-		"		}\n" +
-		"	}\n" +
-		"	c.JSON(http.StatusOK, tools.GetResult(0, \"Params is wrong\", \"\"))\n" +
-		"	return\n" +
-		"}\n"
-	return pk + pks + add + get + delete + update
+func GenerateApi(structName string) (result string, err error) {
+	t := template.New("api")
+	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, ""}
+	//解析内容到模板
+	t, err = t.Parse(apiTemplate)
+	if err != nil {
+		log.Fatal("Parse:", err)
+		return
+	}
+	//将数据用到模板中
+	buf := new(bytes.Buffer)
+	if err = t.Execute(buf, curdStrut); err != nil {
+		log.Fatal("Execute:", err)
+		return
+	} else {
+		result = buf.String()
+	}
+	return
 }
-func GenerateRouter(structName string) string {
-	router := "router.POST(\"/" + strings.ToLower(string(structName)) + "/\", Add" + structName + ")\n" +
-		"	router.GET(\"/" + strings.ToLower(string(structName)) + "/:id\", Get" + structName + ")\n" +
-		"	router.GET(\"/" + strings.ToLower(string(structName)) + "s\", Get" + structName + ")\n" +
-		"	router.DELETE(\"/" + strings.ToLower(string(structName)) + "/:id\", Delete" + structName + ")\n" +
-		"	router.PUT(\"/" + strings.ToLower(string(structName)) + "/:id\", Modify" + structName + ")\n" +
-		"	//Add router\n"
-	return router
+func GenerateRouter(structName string) (result string, err error) {
+	t := template.New("router")
+	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, ""}
+	//解析内容到模板
+	t, err = t.Parse(routerTemplate)
+	if err != nil {
+		log.Fatal("Parse:", err)
+		return
+	}
+	//将数据用到模板中
+	buf := new(bytes.Buffer)
+	if err = t.Execute(buf, curdStrut); err != nil {
+		log.Fatal("Execute:", err)
+		return
+	} else {
+		result = buf.String()
+	}
+	return
 }

@@ -88,10 +88,10 @@ func TestInitRouter(t *testing.T) {
 }
 
 func TestInitApi(t *testing.T) {
-	Convey("model 路由", t, func() {
+	Convey("Api 生成", t, func() {
 		InitDB("company")
 		err := InitApi("Person", "D:/data/go/src/easyGin/handle/")
-		Convey("model 生成", func() {
+		Convey("Api 生成", func() {
 			So(err, ShouldEqual, nil)
 		})
 	})

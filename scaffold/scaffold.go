@@ -102,7 +102,7 @@ func InitModels(table string, structName string, modelsPath string) (err error) 
 
 func InitRouter(structName string, routerPath string) (err error) {
 	routerPath = routerPath + "router.go"
-	router := GenerateRouter(structName)
+	router, err := GenerateRouter(structName)
 	out, isHandle, err := readFile(routerPath, "//Add router", router)
 	if err != nil {
 		fmt.Println("Save File fail: " + err.Error())
@@ -116,7 +116,7 @@ func InitRouter(structName string, routerPath string) (err error) {
 
 func InitApi(structName string, apiPath string) (err error) {
 	apiPath = apiPath + strings.ToLower(structName) + ".go"
-	api := GenerateApi(structName)
+	api, err := GenerateApi(structName)
 	err = writeToFile(apiPath, []byte(api))
 	return
 }
