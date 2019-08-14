@@ -9,7 +9,7 @@ import (
 var MysqlConfigMap = map[string]map[string]string{
 	"debug": {
 		"test":    "root:root@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=10ms",
-		"company": "chelun:chelun@tcp(10.10.1.23:3306)/chelun_home?charset=utf8&parseTime=True&loc=Local&timeout=10ms",
+		"company": "root:root@tcp(127.0.0.1:3306)/test?charset=utf8&parseTime=True&loc=Local&timeout=10ms",
 	},
 }
 var redisConfigMap = map[string]string{
