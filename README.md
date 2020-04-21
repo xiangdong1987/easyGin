@@ -15,6 +15,12 @@
 * 代码测试覆盖
 * 性能测试
 
+## 使用go mod 自动加载
+```
+export GO111MODULE="on"
+```
+
+
 ```
 go run main.go --ifScaffold 1 --struct Person --index test --table person
 ```
