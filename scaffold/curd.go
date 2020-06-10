@@ -8,11 +8,12 @@ import (
 )
 
 type CurdTemplate struct {
-	LowerName  string
-	StructName string
-	FirstChar  string
-	DataIndex  string
-	PrimaryKey string
+	LowerName   string
+	StructName  string
+	FirstChar   string
+	DataIndex   string
+	PrimaryKey  string
+	PackageName string
 }
 
 const curdTemplate = `func ({{.FirstChar}} *{{.StructName}}) Insert() (err error) {
@@ -62,8 +63,8 @@ func ({{.FirstChar}} *{{.StructName}}) ModifyById() (err error) {
 const apiTemplate = `package handle
 
 import (
-	"easyGin/models"
-	"easyGin/tools"
+	"{{.Package}}/models"
+	"{{.Package}}/tools"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -151,9 +152,9 @@ const routerTemplate = `router.POST("/{{.LowerName}}/", Add{{.StructName}})
 	router.PUT("/{{.LowerName}}/:id", Modify{{.StructName}})
 	//Add router`
 
-func GenerateCURD(structName string, primaryKey string) (result string, err error) {
+func GenerateCURD(structName string, primaryKey string, packageName string) (result string, err error) {
 	t := template.New("curl")
-	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, primaryKey}
+	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, primaryKey, packageName}
 	//解析内容到模板
 	t, err = t.Parse(curdTemplate)
 	if err != nil {
@@ -170,9 +171,9 @@ func GenerateCURD(structName string, primaryKey string) (result string, err erro
 	}
 	return
 }
-func GenerateApi(structName string) (result string, err error) {
+func GenerateApi(structName string, packageName string) (result string, err error) {
 	t := template.New("api")
-	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, ""}
+	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, "", packageName}
 	//解析内容到模板
 	t, err = t.Parse(apiTemplate)
 	if err != nil {
@@ -189,9 +190,9 @@ func GenerateApi(structName string) (result string, err error) {
 	}
 	return
 }
-func GenerateRouter(structName string) (result string, err error) {
+func GenerateRouter(structName string, packageName string) (result string, err error) {
 	t := template.New("router")
-	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, ""}
+	curdStrut := CurdTemplate{strings.ToLower(structName), structName, strings.ToLower(string(structName[0])), databaseIndex, "", packageName}
 	//解析内容到模板
 	t, err = t.Parse(routerTemplate)
 	if err != nil {

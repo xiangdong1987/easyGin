@@ -65,7 +65,7 @@ func parseMysql(link string) (err error) {
 	}
 	return
 }
-func InitModels(table string, structName string, modelsPath string) (err error) {
+func InitModels(table string, structName string, modelsPath string, programName string) (err error) {
 	packageName := "models"
 	mariadbTable = table
 	columnDataTypes, err := GetColumnsFromMysqlTable(mariadbUser, mariadbPassword, mariadbHost, mariadbPort, mariadbDatabase, mariadbTable)
@@ -86,10 +86,10 @@ func InitModels(table string, structName string, modelsPath string) (err error) 
 	model := string(struc)
 	//import package
 	reg := regexp.MustCompile(`//packages`)
-	model = reg.ReplaceAllString(model, "import (\"easyGin/database\")")
+	model = reg.ReplaceAllString(model, "import (\""+programName+"/database\")")
 	//get primary key
 	primaryKey := getPrimaryKey(*columnDataTypes)
-	curd, _ := GenerateCURD(structName, primaryKey)
+	curd, _ := GenerateCURD(structName, primaryKey, packageName)
 	model = model + curd
 	targetDirectory := modelsPath + structName + ".go"
 	err = writeToFile(targetDirectory, []byte(model))
@@ -100,9 +100,9 @@ func InitModels(table string, structName string, modelsPath string) (err error) 
 	return
 }
 
-func InitRouter(structName string, routerPath string) (err error) {
+func InitRouter(structName string, routerPath string, packageName string) (err error) {
 	routerPath = routerPath + "router.go"
-	router, err := GenerateRouter(structName)
+	router, err := GenerateRouter(structName, packageName)
 	out, isHandle, err := readFile(routerPath, "//Add router", router)
 	if err != nil {
 		fmt.Println("Save File fail: " + err.Error())
@@ -114,9 +114,9 @@ func InitRouter(structName string, routerPath string) (err error) {
 	return
 }
 
-func InitApi(structName string, apiPath string) (err error) {
+func InitApi(structName string, apiPath string, packageName string) (err error) {
 	apiPath = apiPath + strings.ToLower(structName) + ".go"
-	api, err := GenerateApi(structName)
+	api, err := GenerateApi(structName, packageName)
 	err = writeToFile(apiPath, []byte(api))
 	return
 }

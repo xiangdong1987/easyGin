@@ -12,6 +12,7 @@ var ifScaffold = goopt.Int([]string{"--ifScaffold"}, 0, "if use scaffold")
 var databaseIndex = goopt.String([]string{"--index"}, "", "which config is used")
 var table = goopt.String([]string{"-t", "--table"}, "", "Table to build struct from")
 var structName = goopt.String([]string{"--struct"}, "", "name to set for struct")
+var program = goopt.String([]string{"--program"}, "", "name to set for program")
 
 func init() {
 	// Setup goopts
@@ -52,8 +53,11 @@ func scaffoldInit() {
 	if *structName == "" {
 		panic("structName can not null")
 	}
+	if *program == "" {
+		*program = "easyGin"
+	}
 	scaffold.InitDB(*databaseIndex)
-	scaffold.InitModels(*table, *structName, config.ModelPath)
-	scaffold.InitApi(*structName, config.ApiPath)
-	scaffold.InitRouter(*structName, config.RouterPath)
+	scaffold.InitModels(*table, *structName, config.ModelPath, *program)
+	scaffold.InitApi(*structName, config.ApiPath, *program)
+	scaffold.InitRouter(*structName, config.RouterPath, *program)
 }
