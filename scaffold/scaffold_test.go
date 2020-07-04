@@ -4,15 +4,16 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+	"xAdmin/config"
 )
 
 func TestGenerateCURD(t *testing.T) {
 	Convey("生成Curd", t, func() {
-		InitDB("test")
+		InitDB(config.DBIndex)
 		Convey("正确生成curd", func() {
-			x, _ := GenerateCURD("Person", "id")
+			x, _ := GenerateCURD("Person", "id", "xAmdin")
 			So(x, ShouldEqual, `func (p *Person) Insert() (err error) {
-	dbe, err := database.Database("test") 
+	dbe, err := database.Database(config.DBIndex) 
 	if err != nil { 
 		return 
 	} 
@@ -20,7 +21,7 @@ func TestGenerateCURD(t *testing.T) {
 	return 
 }
 func (p *Person) GetById(id int) (err error) {
-	dbe, err := database.Database("test")
+	dbe, err := database.Database(config.DBIndex)
 	if err != nil {
 		return
 	}
@@ -28,7 +29,7 @@ func (p *Person) GetById(id int) (err error) {
 	return
 }
 func (p *Person) GetList(currentPage int, pageSize int) (list []Person, pageInfo database.PageInfo, err error) { 
-	dbe, err := database.Database("test")
+	dbe, err := database.Database(config.DBIndex)
 	if err != nil {
 		return
 	}
@@ -39,7 +40,7 @@ func (p *Person) GetList(currentPage int, pageSize int) (list []Person, pageInfo
 	return
 }
 func (p *Person) DeleteById(id int) (err error) {
-	dbe, err := database.Database("test")
+	dbe, err := database.Database(config.DBIndex)
 	if err != nil {
 		return
 	}
@@ -47,7 +48,7 @@ func (p *Person) DeleteById(id int) (err error) {
 	return
 }
 func (p *Person) ModifyById() (err error) {
-	dbe, err := database.Database("test")
+	dbe, err := database.Database(config.DBIndex)
 	if err != nil {
 		return
 	}
@@ -60,7 +61,7 @@ func (p *Person) ModifyById() (err error) {
 
 func TestInitDB(t *testing.T) {
 	Convey("初始化DB", t, func() {
-		err := InitDB("test")
+		err := InitDB(config.DBIndex)
 		Convey("初始化DB", func() {
 			So(err, ShouldEqual, nil)
 		})
@@ -70,7 +71,7 @@ func TestInitDB(t *testing.T) {
 func TestInitModels(t *testing.T) {
 	Convey("model 生成", t, func() {
 		InitDB("company")
-		err := InitModels("person", "Person", "D:/data/go/src/easyGin/models/")
+		err := InitModels("person", "Person", "D:/data/go/src/easyGin/models/", "")
 		Convey("model 生成", func() {
 			So(err, ShouldEqual, nil)
 		})
@@ -80,7 +81,7 @@ func TestInitModels(t *testing.T) {
 func TestInitRouter(t *testing.T) {
 	Convey("model 路由", t, func() {
 		InitDB("company")
-		err := InitRouter("Person", "D:/data/go/src/easyGin/router/")
+		err := InitRouter("Person", "D:/data/go/src/easyGin/router/", "")
 		Convey("model 生成", func() {
 			So(err, ShouldEqual, nil)
 		})
@@ -90,7 +91,7 @@ func TestInitRouter(t *testing.T) {
 func TestInitApi(t *testing.T) {
 	Convey("Api 生成", t, func() {
 		InitDB("company")
-		err := InitApi("Person", "D:/data/go/src/easyGin/handle/")
+		err := InitApi("Person", "D:/data/go/src/easyGin/handle/", "")
 		Convey("Api 生成", func() {
 			So(err, ShouldEqual, nil)
 		})
