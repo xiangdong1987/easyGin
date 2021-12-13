@@ -28,10 +28,14 @@ go run main.go --ifScaffold 1 --struct Person --index test --table person
 * 单元测试：对脚手架工具进行了单元测试
 * 性能测试：虚拟机 2G 内存 单核 cup 结果如下
  ![设置1](/static/ab.png)
-## 待开发（思考中，欢迎大神提供建议）
 
-# docker mysql 
-
+# docker mysql
 ```azure
 docker run -itd --name mysql-test -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root mysql
+```
+
+# 自动生成open-api服务端
+```azure
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen --config=types.cfg.yaml person.ymal
+//go:generate go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen --config=server.cfg.yaml person.ymal
 ```
