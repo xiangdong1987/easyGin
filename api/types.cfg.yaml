@@ -1,0 +1,4 @@
+output: ./service/person-types.gen.go
+generate:
+  - types
+package: service

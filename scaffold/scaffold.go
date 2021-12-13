@@ -1,12 +1,12 @@
 package scaffold
 
 import (
+	"easyGin/config"
+	"easyGin/tools"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"regexp"
 	"strings"
-	"xAdmin/config"
-	"xAdmin/tools"
 )
 
 var mariadbHost string
