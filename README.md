@@ -29,3 +29,9 @@ go run main.go --ifScaffold 1 --struct Person --index test --table person
 * 性能测试：虚拟机 2G 内存 单核 cup 结果如下
  ![设置1](/static/ab.png)
 ## 待开发（思考中，欢迎大神提供建议）
+
+# docker mysql 
+
+```azure
+docker run -itd --name mysql-test -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root mysql
+```

@@ -1,11 +1,18 @@
 package main
 
 import (
+	"easyGin/api"
+	"easyGin/api/service"
 	"easyGin/config"
 	"easyGin/database"
-	"easyGin/router"
 	"easyGin/scaffold"
+	"fmt"
+	middleware "github.com/deepmap/oapi-codegen/pkg/gin-middleware"
 	"github.com/droundy/goopt"
+	"github.com/gin-gonic/gin"
+	"log"
+	"net/http"
+	"os"
 )
 
 var ifScaffold = goopt.Int([]string{"--ifScaffold"}, 0, "if use scaffold")
@@ -26,6 +33,40 @@ func init() {
 
 }
 
+func NewGinServer(demo *api.Demo, port int) *http.Server {
+	swagger, err := service.GetSwagger()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error loading swagger spec\n: %s", err)
+		os.Exit(1)
+	}
+
+	// Clear out the servers array in the swagger spec, that skips validating
+	// that server names match. We don't know how this thing will be run.
+	swagger.Servers = nil
+
+	// This is how you set up a basic chi router
+	r := gin.Default()
+	// Use our validation middleware to check all requests against the
+	// OpenAPI schema.
+	r.Use(middleware.OapiRequestValidator(swagger))
+	// We now register our petStore above as the handler for the interface
+	r = service.RegisterHandlers(r, demo)
+
+	s := &http.Server{
+		Handler: r,
+		Addr:    fmt.Sprintf("0.0.0.0:%d", port),
+	}
+	return s
+}
+
+func InitServer(port int) {
+	// Create an instance of our handler which satisfies the generated interface
+	demo := api.NewDemo()
+	s := NewGinServer(demo, port)
+	// And we serve HTTP until the world ends.
+	log.Fatal(s.ListenAndServe())
+}
+
 func main() {
 	if *ifScaffold == 0 {
 		defer func() {
@@ -35,8 +76,7 @@ func main() {
 		}()
 		defer config.RedisObj.Close()
 		config.SetRedisObj()
-		r := router.InitRouter()
-		r.Run(":8082")
+		InitServer(8082)
 	} else {
 		scaffoldInit()
 	}
@@ -58,5 +98,4 @@ func scaffoldInit() {
 	scaffold.InitDB(*dbIndex)
 	scaffold.InitModels(*table, *structName, config.ModelPath, *program)
 	scaffold.InitApi(*structName, config.ApiPath, *program)
-	scaffold.InitRouter(*structName, config.RouterPath, *program)
 }

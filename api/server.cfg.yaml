@@ -1,0 +1,5 @@
+output: ./service/person-server.gen.go
+generate:
+  - gin
+  - spec
+package: service
